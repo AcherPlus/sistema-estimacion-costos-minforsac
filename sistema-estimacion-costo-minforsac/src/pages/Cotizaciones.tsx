@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowRight, List, Triangle, X, MoreHorizontal } from 'lucide-react';
+import { List, Triangle, X, MoreHorizontal } from 'lucide-react';
+import SideBarComponent from '../components/SideBar';
+import CardItem from '../components/CardItem';
 
 interface CotizacionItem {
   id: number;
@@ -10,12 +12,6 @@ interface CotizacionItem {
 }
 
 export const CotizacionesScreen: React.FC = () => {
-  const menuItems = [
-    { name: 'Clientes', active: false },
-    { name: 'Técnicos', active: false },
-    { name: 'Servicios', active: false },
-    { name: 'Cotizaciones', active: true },
-  ];
 
   // Estado de ejemplo para los ítems agregados de la derecha
   const [items, setItems] = useState<CotizacionItem[]>([
@@ -26,69 +22,44 @@ export const CotizacionesScreen: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-[#DCE4F3] font-sans antialiased text-white select-none">
-      
-      {/* 1. SIDEBAR (Menú Lateral) */}
-      <aside className="w-64 bg-[#222861] flex flex-col shrink-0 shadow-xl">
-        {/* Contenedor del Logo */}
-        <div className="p-6 flex justify-center border-b border-white/10">
-          <div className="bg-white p-3 rounded-sm w-44 h-32 flex flex-col items-center justify-center shadow-md">
-            <div className="relative w-12 h-12 mb-1">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-9 h-8 bg-gradient-to-b from-[#6BA4E8] to-[#1E56A0] clip-path-prisma"></div>
-              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-4 border-b border-l border-r border-[#1E56A0]/60 flex flex-col justify-between p-[2px]">
-                <div className="w-full h-[1px] bg-[#1E56A0]/40"></div>
-              </div>
-            </div>
-            <div className="text-xl font-bold tracking-tight text-black">
-              <span className="text-[#6BA4E8]">m</span>
-              <span>inforsac</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Opciones del Menú */}
-        <nav className="flex-1 mt-6">
-          <ul className="space-y-1">
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <button
-                  className={`w-full flex items-center justify-between px-6 py-4 text-base font-medium transition-colors
-                    ${item.active ? 'bg-[#2E3577] border-l-4 border-[#6BA4E8]' : 'hover:bg-[#2E3577]/50'}`}
-                >
-                  <span>{item.name}</span>
-                  <ArrowRight className="w-4 h-4 opacity-80" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
+      {/* 1. SIDEBAR (Menú Lateral) */}
+      <SideBarComponent />
 
       {/* 2. AREA DE CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col">
-        
+
         {/* Cabecera: Título y Nueva Entrada */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-black tracking-tight">Cotizaciones</h1>
           <button className="px-5 py-2 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] transition-all shadow-sm">
-            + Nueva entrada
+            + Nueva cotización
           </button>
         </div>
 
         {/* Contenedor del Formulario Principal */}
         <div className="w-full bg-[#222861] rounded-2xl p-8 shadow-lg flex-1 flex flex-col justify-between">
-          
+
           {/* Grid central de dos columnas */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* COLUMNA IZQUIERDA: Formulario de entrada de ítem */}
             <div className="lg:col-span-6 space-y-4">
-              
+
               {/* Tipo de Ítem */}
               <div className="space-y-2">
-                <label className="text-sm font-normal text-white">Tipo de ítem</label>
-                <div className="w-44 bg-white rounded-full px-4 py-2 flex items-center justify-between text-black cursor-pointer shadow-sm">
-                  <span className="text-sm">Seleccionar</span>
-                  <Triangle className="w-3 h-3 fill-black text-black rotate-180" />
+                <label className="text-s font-normal text-white">Tipo de ítem</label>
+                <div className="w-44">
+                  <select
+                    className="w-full appearance-none bg-white rounded-full px-4 py-2 pr-10 text-sm text-black shadow-sm cursor-pointer focus:outline-none"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Seleccionar
+                    </option>
+                    <option value="producto">Producto</option>
+                    <option value="servicio">Servicio</option>
+                  </select>
                 </div>
               </div>
 
@@ -116,7 +87,7 @@ export const CotizacionesScreen: React.FC = () => {
                   <div className="flex gap-3">
                     {/* Cantidad */}
                     <div className="flex-1 space-y-1">
-                      <label className="text-xs text-white">Cantidad:</label>
+                      <label className="text-s text-white">Cantidad:</label>
                       <input
                         type="text"
                         placeholder='0'
@@ -125,7 +96,7 @@ export const CotizacionesScreen: React.FC = () => {
                     </div>
                     {/* Precio Unitario */}
                     <div className="flex-1 space-y-1">
-                      <label className="text-xs text-white">Precio unitario:</label>
+                      <label className="text-s text-white">Precio unitario:</label>
                       <input
                         type="text"
                         placeholder='0.00'
@@ -136,7 +107,7 @@ export const CotizacionesScreen: React.FC = () => {
 
                   {/* Total del ítem actual */}
                   <div className="space-y-1">
-                    <label className="text-xs text-white">Total:</label>
+                    <label className="text-s text-white">Total:</label>
                     <div className="w-full bg-[#8E92A7] rounded-full py-2 text-black font-medium text-center text-sm shadow-inner">
                       0.00
                     </div>
@@ -157,44 +128,11 @@ export const CotizacionesScreen: React.FC = () => {
 
             {/* COLUMNA DERECHA: Lista de ítems añadidos */}
             <div className="lg:col-span-6 flex flex-col h-full justify-between space-y-3">
-              
+
               {/* Contenedor de lista */}
               <div className="space-y-2.5 overflow-y-auto max-h-[290px] pr-1">
                 {items.map((item) => (
-                  <div key={item.id} className="bg-white rounded-xl p-3 flex items-center justify-between text-black shadow-sm">
-                    {/* Letra identificadora/Avatar */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#DCE4F3] flex items-center justify-center font-bold text-gray-700 rounded-sm">
-                        A
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold leading-tight">{item.nombre}</span>
-                        <span className="text-[11px] text-gray-500">{item.tipo}</span>
-                      </div>
-                    </div>
-
-                    {/* Datos de Cantidad y Subtotal */}
-                    <div className="flex items-center gap-6">
-                      <div className="flex flex-col items-start">
-                        <span className="text-[10px] text-gray-400 font-medium">Cantidad:</span>
-                        <span className="text-xs font-bold leading-none">{item.cantidad}</span>
-                      </div>
-                      <div className="flex flex-col items-start min-w-[50px]">
-                        <span className="text-[10px] text-gray-400 font-medium">Total:</span>
-                        <span className="text-xs font-bold leading-none">{item.total.toFixed(2)}</span>
-                      </div>
-                      
-                      {/* Acciones de fila */}
-                      <div className="flex items-center gap-2 text-gray-700 ml-2">
-                        <button className="hover:text-black">
-                          <MoreHorizontal className="w-5 h-5 stroke-[2.5]" />
-                        </button>
-                        <button className="hover:text-red-600">
-                          <X className="w-5 h-5 stroke-[2.5]" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <CardItem key={item.id} id_item={item.id} nombre={item.nombre} tipo={item.tipo} cantidad={item.cantidad} total={item.total} />
                 ))}
               </div>
 
@@ -217,9 +155,7 @@ export const CotizacionesScreen: React.FC = () => {
               Cancelar
             </button>
           </div>
-
         </div>
-
       </main>
     </div>
   );
