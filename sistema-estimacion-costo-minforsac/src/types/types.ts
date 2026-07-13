@@ -4,12 +4,14 @@ export interface CotizacionItem {
   descripcion: string;
   tipo: string;
   cantidad: number;
+  precio: number;
   total: number;
 }
 
 export interface CotizacionData {
   cliente: string;
   ruc: string;
+  tipo_persona: string;
   direccion: string;
   fecha: string;
   solicitante: string;

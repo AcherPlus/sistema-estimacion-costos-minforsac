@@ -1,4 +1,4 @@
-import { X, MoreHorizontal } from 'lucide-react';
+import { X, MoreHorizontal, Pencil } from 'lucide-react';
 
 export default function CardItem({id_item, nombre, tipo, cantidad, total, onDelete}:{id_item:number, nombre:string, tipo:string, cantidad:GLfloat, total:GLfloat, onDelete: (id:number) => void}) {
      return(
@@ -29,7 +29,7 @@ export default function CardItem({id_item, nombre, tipo, cantidad, total, onDele
                     {/* Acciones de fila */}
                     <div className="flex items-center gap-2 text-gray-700 ml-2">
                     <button className="hover:text-black">
-                         <MoreHorizontal className="w-5 h-5 stroke-[2.5]" />
+                         <Pencil className="w-5 h-5 stroke-[2.5]" />
                     </button>
                     <button
                     onClick={() => onDelete(id_item)}

@@ -152,7 +152,11 @@ export const CotizacionDocument = ({ data } : CotizacionDocumentProps) => {
     { item: '1', descripcion: 'Ejemplo de producto o servicio', cantidad: 1, precioUnitario: 100.00 }
   ];
 
-  const subtotal = items.reduce((acc, curr) => acc + curr.cantidad * 1, 0);
+  const subtotal = items.reduce(
+      (acc, item) => acc + item.total,
+      0
+  );
+
   const igv = subtotal * 0.18;
   const total = subtotal + igv;
 
@@ -182,8 +186,8 @@ export const CotizacionDocument = ({ data } : CotizacionDocumentProps) => {
               <Text style={styles.value}>{data?.cliente || '-'}</Text>
             </View>
             <View style={styles.rowDetail}>
-              <Text style={styles.label}>R.U.C:</Text>
-              <Text style={styles.value}>{data?.ruc || '-'}</Text>
+              <Text style={styles.label}>TIPO PERSONA:</Text>
+              <Text style={styles.value}>{data?.tipo_persona || '-'}</Text>
             </View>
             <View style={styles.rowDetail}>
               <Text style={styles.label}>DIRECCIÓN:</Text>
@@ -198,7 +202,7 @@ export const CotizacionDocument = ({ data } : CotizacionDocumentProps) => {
             </View>
             <View style={styles.rowDetail}>
               <Text style={styles.label}>SOLICITANTE:</Text>
-              <Text style={styles.value}>{data?.solicitante || '-'}</Text>
+              <Text style={styles.value}>{data?.solicitante || 'Empleado N°3'}</Text>
             </View>
             <View style={styles.rowDetail}>
               <Text style={styles.label}>MONEDA:</Text>
@@ -220,12 +224,12 @@ export const CotizacionDocument = ({ data } : CotizacionDocumentProps) => {
 
           {items.map((row, index) => (
             <View style={styles.tableRow} key={index}>
-              <Text style={styles.colItems}>{1 || index + 1}</Text>
+              <Text style={styles.colItems}>{index + 1}</Text>
               <Text style={styles.colName}>{row.nombre}</Text>
               <Text style={styles.colDesc}>{row.descripcion}</Text>
               <Text style={styles.colQty}>{row.cantidad}</Text>
-              {/* <Text style={styles.colUnitPrice}>{row.precioUnitario.toFixed(2)}</Text>
-              <Text style={styles.colTotal}>{(row.cantidad * row.precioUnitario).toFixed(2)}</Text> */}
+              <Text style={styles.colUnitPrice}>{row.precio.toFixed(2)}</Text>
+              <Text style={styles.colTotal}>{(row.cantidad * row.precio).toFixed(2)}</Text>
             </View>
           ))}
         </View>

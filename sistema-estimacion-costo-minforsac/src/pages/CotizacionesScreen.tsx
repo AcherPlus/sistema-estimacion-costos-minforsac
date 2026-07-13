@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import SideBarComponent from '../components/SideBar';
-import CardItem from '../components/CardItem';
+import CardItem from '../components/CotizacionItem';
 import { obtenerClientes, type Cliente } from '../services/clientes';
 import { useNavigate } from 'react-router-dom';
 import type { CotizacionItem } from '../types/types';
@@ -29,9 +29,9 @@ export const CotizacionesScreen: React.FC = () => {
 
   // Estado de ejemplo para los ítems agregados
   const [items, setItems] = useState<CotizacionItem[]>([
-    { id: 1, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
-    { id: 2, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
-    { id: 3, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
+    { id: 1, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
+    { id: 2, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
+    { id: 3, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
   ]);
 
   useEffect(() => {
@@ -100,6 +100,7 @@ export const CotizacionesScreen: React.FC = () => {
       descripcion: descripcion,
       tipo: tipo === 'producto' ? 'Producto' : 'Servicio',
       cantidad: Number(cantidad),
+      precio: Number(precio),
       total: totalItemActual,
     };
 
@@ -114,7 +115,10 @@ export const CotizacionesScreen: React.FC = () => {
   };
 
   // Cálculo del total acumulado general
-  const totalGeneral = items.reduce((acc, curr) => acc + curr.total, 0);
+  const totalGeneral = items.reduce((acc, curr) => (acc + curr.total), 0);
+  const subtotal = totalGeneral;
+  const igv = subtotal * 0.18;
+  const totalConIGV = subtotal + igv;
 
   // Eliminar un item de la lista
   const handleDeleteItem = (id: number) => {
@@ -124,12 +128,18 @@ export const CotizacionesScreen: React.FC = () => {
 
   // Envío a documento PDF
   const enviarParaDocumento = () => {
+    if (!clienteNombre || !direccion || !tipoPersona) {
+      alert('Por favor completa los campos principales del ítem.');
+      return;
+    }
+    
     navigate("/cotizacion-pdf", {
       state: {
         data: {
           cliente: clienteNombre,
           direccion: direccion,
           fecha: new Date().toISOString().split("T")[0],
+          solicitante: 'Juan Perez',
           moneda: "SOLES",
           items,
         },
@@ -158,7 +168,7 @@ export const CotizacionesScreen: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {/* COLUMNA IZQUIERDA: Formulario de entrada de ítem */}
-            <div className="lg:col-span-6 space-y-4">
+            <div className="lg:col-span-7 space-y-4">
 
               {/* SECCIÓN DATOS DEL CLIENTE EN 1 FILA */}
               <div className="space-y-2">
@@ -204,7 +214,7 @@ export const CotizacionesScreen: React.FC = () => {
                       value={direccion}
                       onChange={(e) => setDireccion(e.target.value)}
                       className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
-
+                      readOnly
                     />
                   </div>
 
@@ -216,7 +226,7 @@ export const CotizacionesScreen: React.FC = () => {
                       value={tipoPersona}
                       onChange={(e) => setTipoPersona(e.target.value)}
                       className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
-
+                      readOnly
                     />
                   </div>
                 </div>
@@ -366,7 +376,7 @@ export const CotizacionesScreen: React.FC = () => {
             </div>
 
             {/* COLUMNA DERECHA: Lista de ítems añadidos */}
-            <div className="lg:col-span-6 flex flex-col h-full justify-between space-y-3">
+            <div className="lg:col-span-5 flex flex-col h-full justify-between space-y-3">
 
               {/* Contenedor de lista */}
               <div className="space-y-2.5 overflow-y-auto max-h-[350px] pr-1">
@@ -386,7 +396,7 @@ export const CotizacionesScreen: React.FC = () => {
               {/* Total acumulado general */}
               <div className="bg-[#8E92A7] rounded-xl p-3.5 flex items-center justify-between text-black font-bold shadow-inner mt-4">
                 <span className="text-sm font-medium">Total</span>
-                <span className="text-base font-bold tracking-wide">{totalGeneral.toFixed(2)}</span>
+                <span className="text-base font-bold tracking-wide">{totalConIGV.toFixed(2)}</span>
               </div>
 
             </div>

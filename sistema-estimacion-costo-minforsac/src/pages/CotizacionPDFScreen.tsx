@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { PDFViewer } from "@react-pdf/renderer";
-import CotizacionDocument from "../components/CotizacionDocument";
+import CotizacionDocument from "../components/CotizacionReporte";
 
 export default function CotizacionPdfScreen() {
      const { state } = useLocation();
