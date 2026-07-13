@@ -4,10 +4,10 @@ import Minforsac from './../assets/logo_minforsac.jpg';
 export default function SideBarComponent() {
 
      const menuItems = [
-          { name: 'Clientes', active: true },
+          { name: 'Clientes', active: false },
           { name: 'Técnicos', active: false },
           { name: 'Servicios', active: false },
-          { name: 'Cotizaciones', active: false },
+          { name: 'Cotizaciones', active: true },
      ];
 
      return (

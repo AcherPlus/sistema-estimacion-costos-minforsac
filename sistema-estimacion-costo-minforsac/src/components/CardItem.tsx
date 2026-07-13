@@ -1,6 +1,6 @@
 import { X, MoreHorizontal } from 'lucide-react';
 
-export default function CardItem({id_item, nombre, tipo, cantidad, total}:{id_item:number, nombre:string, tipo:string, cantidad:GLfloat, total:GLfloat}) {
+export default function CardItem({id_item, nombre, tipo, cantidad, total, onDelete}:{id_item:number, nombre:string, tipo:string, cantidad:GLfloat, total:GLfloat, onDelete: (id:number) => void}) {
      return(
           <>
                <div key={id_item} className="bg-white rounded-xl p-3 flex items-center justify-between text-black shadow-sm">
@@ -31,7 +31,9 @@ export default function CardItem({id_item, nombre, tipo, cantidad, total}:{id_it
                     <button className="hover:text-black">
                          <MoreHorizontal className="w-5 h-5 stroke-[2.5]" />
                     </button>
-                    <button className="hover:text-red-600">
+                    <button
+                    onClick={() => onDelete(id_item)}
+                    className="hover:text-red-600">
                          <X className="w-5 h-5 stroke-[2.5]" />
                     </button>
                     </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { List, Triangle, X, MoreHorizontal } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { List, ChevronDown, Plus } from 'lucide-react';
 import SideBarComponent from '../components/SideBar';
 import CardItem from '../components/CardItem';
+import { obtenerClientes, type Cliente } from '../services/clientes';
 
 interface CotizacionItem {
   id: number;
@@ -12,13 +13,122 @@ interface CotizacionItem {
 }
 
 export const CotizacionesScreen: React.FC = () => {
+  // Estado para controlar si los detalles del ítem están visibles u ocultos
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  // Estado de ejemplo para los ítems agregados de la derecha
+  // Estados globales para los datos del cliente
+  const [clienteNombre, setClienteNombre] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [tipoPersona, setTipoPersona] = useState('');
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [sugerencias, setSugerencias] = useState<Cliente[]>([]);
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+  const inputClienteRef = useRef<HTMLInputElement>(null);
+  // const [ruc, setRuc] = useState('');
+
+  // Estados del formulario para agregar un ítem
+  const [tipo, setTipo] = useState('');
+  const [nombreItem, setNombreItem] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [cantidad, setCantidad] = useState<number | ''>('');
+  const [precio, setPrecio] = useState<number | ''>('');
+
+  // Estado de ejemplo para los ítems agregados
   const [items, setItems] = useState<CotizacionItem[]>([
     { id: 1, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
     { id: 2, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
     { id: 3, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
   ]);
+
+  useEffect(() => {
+    const cargarClientes = async () => {
+      try {
+        const data = await obtenerClientes();
+        setClientes(data);
+      } catch (error) {
+        console.error('Error al cargar clientes', error);
+      }
+    };
+
+    cargarClientes();
+  }, []);
+
+  useEffect(() => {
+    const manejarClicFuera = (event: MouseEvent) => {
+      if (
+        inputClienteRef.current &&
+        !inputClienteRef.current.contains(event.target as Node)
+      ) {
+        setMostrarSugerencias(false);
+      }
+    };
+
+    document.addEventListener('mousedown', manejarClicFuera);
+    return () => document.removeEventListener('mousedown', manejarClicFuera);
+  }, []);
+
+  useEffect(() => {
+    if (!clienteNombre.trim()) {
+      setSugerencias([]);
+      setMostrarSugerencias(false);
+      return;
+    }
+
+    const texto = clienteNombre.toLowerCase();
+    const filtrados = clientes.filter((cliente) =>
+      cliente.nombre.toLowerCase().includes(texto)
+    );
+
+    setSugerencias(filtrados.slice(0, 6));
+    setMostrarSugerencias(filtrados.length > 0);
+  }, [clienteNombre, clientes]);
+
+  const seleccionarCliente = (cliente: Cliente) => {
+    setClienteNombre(cliente.nombre);
+    setDireccion(cliente.direccion);
+    setTipoPersona(cliente.tipo_persona);
+    setMostrarSugerencias(false);
+  };
+
+  // Cálculo automático del total del ítem actual
+  const totalItemActual = (Number(cantidad) || 0) * (Number(precio) || 0);
+
+  // Función para agregar un nuevo ítem a la columna derecha
+  const handleAddItem = () => {
+    if (!nombreItem || !tipo || !cantidad || !precio) {
+      alert('Por favor completa los campos principales del ítem.');
+      return;
+    }
+
+    const newItem: CotizacionItem = {
+      id: Date.now(),
+      nombre: nombreItem,
+      tipo: tipo === 'producto' ? 'Producto' : 'Servicio',
+      cantidad: Number(cantidad),
+      total: totalItemActual,
+    };
+
+    setItems([...items, newItem]);
+
+    // Limpiar formulario de ítem tras agregar
+    setNombreItem('');
+    setTipo('');
+    setDescripcion('');
+    setCantidad('');
+    setPrecio('');
+  };
+
+  // Cálculo del total acumulado general
+  const totalGeneral = items.reduce((acc, curr) => acc + curr.total, 0);
+
+  // Eliminar un item de la lista
+  const handleDeleteItem = (id: number) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== id));
+  };
+
+
+  // Envío a documento PDF
+  
 
   return (
     <div className="flex min-h-screen bg-[#DCE4F3] font-sans antialiased text-white select-none">
@@ -26,15 +136,12 @@ export const CotizacionesScreen: React.FC = () => {
       {/* 1. SIDEBAR (Menú Lateral) */}
       <SideBarComponent />
 
-      {/* 2. AREA DE CONTENIDO PRINCIPAL */}
+      {/* 2. ÁREA DE CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col">
 
-        {/* Cabecera: Título y Nueva Entrada */}
+        {/* Cabecera: Título */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-black tracking-tight">Cotizaciones</h1>
-          <button className="px-5 py-2 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] transition-all shadow-sm">
-            + Nueva cotización
-          </button>
         </div>
 
         {/* Contenedor del Formulario Principal */}
@@ -46,13 +153,76 @@ export const CotizacionesScreen: React.FC = () => {
             {/* COLUMNA IZQUIERDA: Formulario de entrada de ítem */}
             <div className="lg:col-span-6 space-y-4">
 
-              {/* Tipo de Ítem */}
+              {/* SECCIÓN DATOS DEL CLIENTE EN 1 FILA */}
               <div className="space-y-2">
-                <label className="text-s font-normal text-white">Tipo de ítem</label>
+                <label className="block text-s font-normal text-white mb-2">Datos del cliente</label>
+                
+                {/* Grid de 3 inputs en la misma fila */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  {/* Nombre / Razón Social (5 cols) */}
+                  <div className="md:col-span-5 relative">
+                    <input
+                      ref={inputClienteRef}
+                      type="text"
+                      placeholder="Nombre/Razón Social"
+                      value={clienteNombre}
+                      onChange={(e) => setClienteNombre(e.target.value)}
+                      onFocus={() => clienteNombre.trim() && setMostrarSugerencias(true)}
+                      className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
+                    />
+
+                    {mostrarSugerencias && sugerencias.length > 0 && (
+                      <ul className="absolute z-10 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg max-h-48 overflow-auto">
+                        {sugerencias.map((cliente) => (
+                          <li
+                            key={cliente.cliente_id}
+                            onMouseDown={(e) => {
+                              e.preventDefault(); // Evita que el input pierda el foco antes de tiempo
+                              seleccionarCliente(cliente);
+                            }}
+                            className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            {cliente.nombre}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Dirección (4 cols) */}
+                  <div className="md:col-span-4">
+                    <input
+                      type="text"
+                      placeholder="Dirección"
+                      value={direccion}
+                      onChange={(e) => setDireccion(e.target.value)}
+                      className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
+                      disabled
+                    />
+                  </div>
+
+                  {/* Tipo Persona */}
+                  <div className="md:col-span-3">
+                    <input
+                      type="text"
+                      placeholder="Tipo Persona"
+                      value={tipoPersona}
+                      onChange={(e) => setTipoPersona(e.target.value)}
+                      className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm text-center"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tipo de Ítem */}
+              <div className="space-y-2 pt-2">
+                <label className="block text-s font-normal text-white mb-2">Tipo de ítem</label>
                 <div className="w-44">
                   <select
-                    className="w-full appearance-none bg-white rounded-full px-4 py-2 pr-10 text-sm text-black shadow-sm cursor-pointer focus:outline-none"
-                    defaultValue=""
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    className="w-full appearance-none bg-white rounded-full px-4 py-2 pr-10 text-sm text-black shadow-sm cursor-pointer focus:outline-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem] bg-[right_0.8rem_center] bg-no-repeat"
                   >
                     <option value="" disabled>
                       Seleccionar
@@ -68,6 +238,8 @@ export const CotizacionesScreen: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Nombre del ítem"
+                  value={nombreItem}
+                  onChange={(e) => setNombreItem(e.target.value)}
                   className="w-full bg-white rounded-full px-5 py-2.5 text-black placeholder-gray-500 text-sm outline-none shadow-sm"
                 />
               </div>
@@ -78,6 +250,8 @@ export const CotizacionesScreen: React.FC = () => {
                 <div className="col-span-5">
                   <textarea
                     placeholder="Descripción"
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
                     className="w-full h-32 bg-white rounded-2xl p-4 text-black placeholder-gray-500 text-sm outline-none resize-none shadow-sm"
                   />
                 </div>
@@ -89,8 +263,10 @@ export const CotizacionesScreen: React.FC = () => {
                     <div className="flex-1 space-y-1">
                       <label className="text-s text-white">Cantidad:</label>
                       <input
-                        type="text"
-                        placeholder='0'
+                        type="number"
+                        placeholder="0"
+                        value={cantidad}
+                        onChange={(e) => setCantidad(e.target.value ? Number(e.target.value) : '')}
                         className="w-full bg-white rounded-full px-4 py-1.5 text-black text-center text-sm outline-none shadow-sm"
                       />
                     </div>
@@ -98,8 +274,10 @@ export const CotizacionesScreen: React.FC = () => {
                     <div className="flex-1 space-y-1">
                       <label className="text-s text-white">Precio unitario:</label>
                       <input
-                        type="text"
-                        placeholder='0.00'
+                        type="number"
+                        placeholder="0.00"
+                        value={precio}
+                        onChange={(e) => setPrecio(e.target.value ? Number(e.target.value) : '')}
                         className="w-full bg-white rounded-full px-4 py-1.5 text-black text-center text-sm outline-none shadow-sm"
                       />
                     </div>
@@ -109,19 +287,73 @@ export const CotizacionesScreen: React.FC = () => {
                   <div className="space-y-1">
                     <label className="text-s text-white">Total:</label>
                     <div className="w-full bg-[#8E92A7] rounded-full py-2 text-black font-medium text-center text-sm shadow-inner">
-                      0.00
+                      {totalItemActual.toFixed(2)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Detalles específicos del ítem */}
-              <div className="w-full bg-[#E2E4E9] rounded-full px-5 py-2.5 flex items-center justify-between text-black cursor-pointer shadow-sm mt-2">
-                <div className="flex items-center gap-2">
-                  <List className="w-4 h-4 text-black" />
-                  <span className="text-sm font-medium">Detalles específicos del ítem</span>
-                </div>
-                <Triangle className="w-3 h-3 fill-black text-black rotate-180" />
+              {/* DESPLEGABLE: Detalles específicos del ítem */}
+              <div className="mt-2 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+                  className="w-full bg-[#E2E4E9] rounded-full px-5 py-2.5 flex items-center justify-between text-black hover:bg-white transition-all shadow-sm focus:outline-none"
+                >
+                  <div className="flex items-center gap-2">
+                    <List className="w-4 h-4 text-black" />
+                    <span className="text-sm font-medium">Detalles específicos del ítem</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-black transition-transform duration-300 ${
+                      isDetailsOpen ? 'rotate-180' : 'rotate-0'
+                    }`}
+                  />
+                </button>
+
+                {isDetailsOpen && (
+                  <div className="bg-[#1C204E] rounded-2xl p-4 space-y-3 border border-[#343C8F] transition-all duration-300">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-300 mb-1">Código / SKU</label>
+                        <input
+                          type="text"
+                          placeholder="SKU-0000"
+                          className="w-full bg-white rounded-full px-4 py-1.5 text-black text-xs outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-300 mb-1">Descuento (%)</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          className="w-full bg-white rounded-full px-4 py-1.5 text-black text-xs outline-none shadow-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-300 mb-1">Notas internas / Garantía</label>
+                      <input
+                        type="text"
+                        placeholder="Ej. Garantía de 12 meses..."
+                        className="w-full bg-white rounded-full px-4 py-1.5 text-black text-xs outline-none shadow-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* BOTÓN PARA AGREGAR EL ÍTEM A LA LISTA */}
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleAddItem}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] active:scale-95 transition-all shadow-md"
+                >
+                  <Plus className="w-4 h-4" />
+                  Agregar ítem
+                </button>
               </div>
 
             </div>
@@ -130,16 +362,24 @@ export const CotizacionesScreen: React.FC = () => {
             <div className="lg:col-span-6 flex flex-col h-full justify-between space-y-3">
 
               {/* Contenedor de lista */}
-              <div className="space-y-2.5 overflow-y-auto max-h-[290px] pr-1">
+              <div className="space-y-2.5 overflow-y-auto max-h-[350px] pr-1">
                 {items.map((item) => (
-                  <CardItem key={item.id} id_item={item.id} nombre={item.nombre} tipo={item.tipo} cantidad={item.cantidad} total={item.total} />
+                  <CardItem
+                    key={item.id}
+                    id_item={item.id}
+                    nombre={item.nombre}
+                    tipo={item.tipo}
+                    cantidad={item.cantidad}
+                    total={item.total}
+                    onDelete={handleDeleteItem}
+                  />
                 ))}
               </div>
 
               {/* Total acumulado general */}
               <div className="bg-[#8E92A7] rounded-xl p-3.5 flex items-center justify-between text-black font-bold shadow-inner mt-4">
                 <span className="text-sm font-medium">Total</span>
-                <span className="text-base font-bold tracking-wide">750.00</span>
+                <span className="text-base font-bold tracking-wide">{totalGeneral.toFixed(2)}</span>
               </div>
 
             </div>
@@ -148,7 +388,8 @@ export const CotizacionesScreen: React.FC = () => {
 
           {/* Botones de acción inferiores */}
           <div className="flex justify-center items-center gap-5 mt-8 pt-4">
-            <button className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm">
+            <button
+            className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm">
               Guardar cotización
             </button>
             <button className="px-8 py-2.5 bg-[#E2E4E9] text-gray-900 font-medium rounded-full hover:bg-white transition-all shadow-md text-sm border border-gray-300">
