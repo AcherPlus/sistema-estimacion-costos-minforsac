@@ -1,14 +1,22 @@
 import { ArrowRight } from 'lucide-react';
 import Minforsac from './../assets/logo_minforsac.jpg';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function SideBarComponent() {
 
+     const navigate = useNavigate();
+     const location = useLocation();
+     
      const menuItems = [
-          { name: 'Clientes', active: false },
-          { name: 'Técnicos', active: false },
-          { name: 'Servicios', active: false },
-          { name: 'Cotizaciones', active: true },
+          { name: 'Clientes', active: false, route: '/clientes' },
+          { name: 'Técnicos', active: false, route: '/tecnicos' },
+          { name: 'Servicios', active: false, route: '/servicios' },
+          { name: 'Cotizaciones', active: true, route: '/cotizaciones' },
      ];
+
+     const accederPagina = (route: string) => {
+          navigate(route);
+     }
 
      return (
           <>
@@ -20,19 +28,26 @@ export default function SideBarComponent() {
                     </div>
 
                     {/* Opciones del Menú */}
+                    {/* Opciones del Menú */}
                     <nav className="flex-1 mt-6">
                          <ul className="space-y-1">
-                              {menuItems.map((item) => (
-                                   <li key={item.name}>
-                                        <button
-                                             className={`w-full flex items-center justify-between px-6 py-4 text-base font-medium transition-colors text-white
-                              ${item.active ? 'bg-[#2E3577] border-l-4 border-[#6BA4E8]' : 'hover:bg-[#2E3577]/50'}`}
-                                        >
-                                             <span>{item.name}</span>
-                                             <ArrowRight className="w-4 h-4 opacity-80" />
-                                        </button>
-                                   </li>
-                              ))}
+                              {menuItems.map((item) => {
+                                   // 4. Determina si el elemento está activo comparando las rutas
+                                   const isActive = location.pathname === item.route;
+
+                                   return (
+                                        <li key={item.name}>
+                                             <button
+                                                  onClick={() => accederPagina(item.route)}
+                                                  className={`w-full flex items-center justify-between px-6 py-4 text-base font-medium transition-colors text-white cursor-pointer
+                                   ${isActive ? 'bg-[#2E3577] border-l-4 border-[#6BA4E8]' : 'hover:bg-[#2E3577]/50'}`}
+                                             >
+                                                  <span>{item.name}</span>
+                                                  <ArrowRight className="w-4 h-4 opacity-80" />
+                                             </button>
+                                        </li>
+                                   );
+                              })}
                          </ul>
                     </nav>
                </aside>
