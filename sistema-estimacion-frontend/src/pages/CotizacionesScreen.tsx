@@ -366,7 +366,7 @@ export const CotizacionesScreen: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] active:scale-95 transition-all shadow-md border border-white"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] active:scale-95 transition-all shadow-md border border-white cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Agregar ítem
@@ -406,10 +406,10 @@ export const CotizacionesScreen: React.FC = () => {
           {/* Botones de acción inferiores */}
           <div className="flex justify-center items-center gap-5 mt-8 pt-4">
             <button onClick={enviarParaDocumento}
-              className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm">
+              className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm cursor-pointer">
               Guardar cotización
             </button>
-            <button className="px-8 py-2.5 bg-[#E2E4E9] text-gray-900 font-medium rounded-full hover:bg-white transition-all shadow-md text-sm border border-gray-300">
+            <button className="px-8 py-2.5 bg-[#E2E4E9] text-gray-900 font-medium rounded-full hover:bg-white transition-all shadow-md text-sm border border-gray-300 cursor-pointer">
               Cancelar
             </button>
           </div>
