@@ -1,20 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { List, ChevronDown, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import SideBarComponent from '../components/SideBar';
 import CardItem from '../components/CardItem';
 import { obtenerClientes, type Cliente } from '../services/clientes';
-
-interface CotizacionItem {
-  id: number;
-  nombre: string;
-  tipo: string;
-  cantidad: number;
-  total: number;
-}
+import { useNavigate } from 'react-router-dom';
+import type { CotizacionItem } from '../types/types';
 
 export const CotizacionesScreen: React.FC = () => {
-  // Estado para controlar si los detalles del ítem están visibles u ocultos
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   // Estados globales para los datos del cliente
   const [clienteNombre, setClienteNombre] = useState('');
@@ -35,9 +29,9 @@ export const CotizacionesScreen: React.FC = () => {
 
   // Estado de ejemplo para los ítems agregados
   const [items, setItems] = useState<CotizacionItem[]>([
-    { id: 1, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
-    { id: 2, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
-    { id: 3, nombre: 'Nombre del ítem', tipo: 'Producto', cantidad: 2, total: 250.00 },
+    { id: 1, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
+    { id: 2, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
+    { id: 3, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, total: 250.00 },
   ]);
 
   useEffect(() => {
@@ -103,6 +97,7 @@ export const CotizacionesScreen: React.FC = () => {
     const newItem: CotizacionItem = {
       id: Date.now(),
       nombre: nombreItem,
+      descripcion: descripcion,
       tipo: tipo === 'producto' ? 'Producto' : 'Servicio',
       cantidad: Number(cantidad),
       total: totalItemActual,
@@ -128,7 +123,19 @@ export const CotizacionesScreen: React.FC = () => {
 
 
   // Envío a documento PDF
-  
+  const enviarParaDocumento = () => {
+    navigate("/cotizacion-pdf", {
+      state: {
+        data: {
+          cliente: clienteNombre,
+          direccion: direccion,
+          fecha: new Date().toISOString().split("T")[0],
+          moneda: "SOLES",
+          items,
+        },
+      },
+    });
+  }
 
   return (
     <div className="flex min-h-screen bg-[#DCE4F3] font-sans antialiased text-white select-none">
@@ -156,7 +163,7 @@ export const CotizacionesScreen: React.FC = () => {
               {/* SECCIÓN DATOS DEL CLIENTE EN 1 FILA */}
               <div className="space-y-2">
                 <label className="block text-s font-normal text-white mb-2">Datos del cliente</label>
-                
+
                 {/* Grid de 3 inputs en la misma fila */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   {/* Nombre / Razón Social (5 cols) */}
@@ -197,7 +204,7 @@ export const CotizacionesScreen: React.FC = () => {
                       value={direccion}
                       onChange={(e) => setDireccion(e.target.value)}
                       className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
-                      disabled
+
                     />
                   </div>
 
@@ -208,8 +215,8 @@ export const CotizacionesScreen: React.FC = () => {
                       placeholder="Tipo Persona"
                       value={tipoPersona}
                       onChange={(e) => setTipoPersona(e.target.value)}
-                      className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm text-center"
-                      disabled
+                      className="w-full bg-white rounded-full px-4 py-2 text-black placeholder-gray-500 text-xs md:text-sm outline-none shadow-sm"
+
                     />
                   </div>
                 </div>
@@ -294,7 +301,7 @@ export const CotizacionesScreen: React.FC = () => {
               </div>
 
               {/* DESPLEGABLE: Detalles específicos del ítem */}
-              <div className="mt-2 space-y-3">
+              {/* <div className="mt-2 space-y-3">
                 <button
                   type="button"
                   onClick={() => setIsDetailsOpen(!isDetailsOpen)}
@@ -342,14 +349,14 @@ export const CotizacionesScreen: React.FC = () => {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* BOTÓN PARA AGREGAR EL ÍTEM A LA LISTA */}
               <div className="pt-2 flex justify-end">
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] active:scale-95 transition-all shadow-md"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2A317A] text-white text-sm font-medium rounded-full hover:bg-[#1C2257] active:scale-95 transition-all shadow-md border border-white"
                 >
                   <Plus className="w-4 h-4" />
                   Agregar ítem
@@ -388,8 +395,8 @@ export const CotizacionesScreen: React.FC = () => {
 
           {/* Botones de acción inferiores */}
           <div className="flex justify-center items-center gap-5 mt-8 pt-4">
-            <button
-            className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm">
+            <button onClick={enviarParaDocumento}
+              className="px-8 py-2.5 bg-[#343C8F] text-white font-medium rounded-full hover:bg-[#282E6E] transition-all shadow-md text-sm">
               Guardar cotización
             </button>
             <button className="px-8 py-2.5 bg-[#E2E4E9] text-gray-900 font-medium rounded-full hover:bg-white transition-all shadow-md text-sm border border-gray-300">

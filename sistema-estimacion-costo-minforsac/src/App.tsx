@@ -1,15 +1,26 @@
 import './App.css'
-// import ClientesScreen from './pages/Clientes'
-import CotizacionesScreen from './pages/Cotizaciones'
-// import LoginScreen from './pages/InicioSesion'
+import CotizacionPdfScreen from './pages/CotizacionPDFScreen';
+import ClientesScreen from './pages/ClientesScreen'
+import CotizacionesScreen from './pages/CotizacionesScreen'
+import LoginScreen from './pages/InicioSesionScreen'
+import {Routes, Route, Navigate} from 'react-router-dom';
 
 function App() {
 
   return (
     <>
-      {/* <LoginScreen /> */}
-      {/* <ClientesScreen /> */}
-      <CotizacionesScreen />
+      <Routes>
+        {/* Pantalla inicial (Login) */}
+        <Route path="/" element={<LoginScreen />} />
+        
+        {/* Resto de pantallas de tu app */}
+        <Route path="/clientes" element={<ClientesScreen />} />
+        <Route path="/cotizaciones" element={<CotizacionesScreen />} />
+        <Route path="/cotizacion-pdf" element={<CotizacionPdfScreen/>}/>
+
+        {/* Redirección automática si escriben una ruta que no existe */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </>
   )
 }

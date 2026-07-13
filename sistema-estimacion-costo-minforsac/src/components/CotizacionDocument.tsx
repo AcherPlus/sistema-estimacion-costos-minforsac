@@ -1,5 +1,9 @@
-import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import type { CotizacionData } from '../types/types';
+
+interface CotizacionDocumentProps {
+  data: CotizacionData;
+}
 
 // Definición de estilos
 const styles = StyleSheet.create({
@@ -86,6 +90,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   colItems: { width: '10%', textAlign: 'center' },
+  colName: {width: '20%', textAlign: 'center'},
   colDesc: { width: '50%', paddingLeft: 5 },
   colQty: { width: '12%', textAlign: 'center' },
   colUnitPrice: { width: '14%', textAlign: 'right' },
@@ -142,12 +147,12 @@ const styles = StyleSheet.create({
   }
 });
 
-export const CotizacionDocument = ({ data }) => {
+export const CotizacionDocument = ({ data } : CotizacionDocumentProps) => {
   const items = data?.items || [
     { item: '1', descripcion: 'Ejemplo de producto o servicio', cantidad: 1, precioUnitario: 100.00 }
   ];
 
-  const subtotal = items.reduce((acc, curr) => acc + curr.cantidad * curr.precioUnitario, 0);
+  const subtotal = items.reduce((acc, curr) => acc + curr.cantidad * 1, 0);
   const igv = subtotal * 0.18;
   const total = subtotal + igv;
 
@@ -158,7 +163,7 @@ export const CotizacionDocument = ({ data }) => {
         {/* Encabezado */}
         <View style={styles.headerContainer}>
           <View style={styles.companyDetails}>
-            <Text style={styles.companyName}>MINFOR S.A.C.</Text>
+            <Text style={styles.companyName}>Multiversicios Informáticos S.A.C</Text>
             <Text>R.U.C. : 20508243490</Text>
             <Text>DIRECCIÓN: JR. LAS CALÉNDULAS 688 LAS FLORES - S.J.L.</Text>
             <Text>TELÉFONO: 376 - 0122</Text>
@@ -178,11 +183,11 @@ export const CotizacionDocument = ({ data }) => {
             </View>
             <View style={styles.rowDetail}>
               <Text style={styles.label}>R.U.C:</Text>
-              <Text style={styles.value}>{data?.rucCliente || '-'}</Text>
+              <Text style={styles.value}>{data?.ruc || '-'}</Text>
             </View>
             <View style={styles.rowDetail}>
               <Text style={styles.label}>DIRECCIÓN:</Text>
-              <Text style={styles.value}>{data?.direccionCliente || '-'}</Text>
+              <Text style={styles.value}>{data?.direccion || '-'}</Text>
             </View>
           </View>
 
@@ -206,6 +211,7 @@ export const CotizacionDocument = ({ data }) => {
         <View style={styles.table}>
           <View style={[styles.tableRow, styles.tableHeader]}>
             <Text style={styles.colItems}>ÍTEMS</Text>
+            <Text style={styles.colName}>NOMBRE</Text>
             <Text style={styles.colDesc}>DESCRIPCIÓN</Text>
             <Text style={styles.colQty}>CANTIDAD</Text>
             <Text style={styles.colUnitPrice}>PRECIO UNIT.</Text>
@@ -214,11 +220,12 @@ export const CotizacionDocument = ({ data }) => {
 
           {items.map((row, index) => (
             <View style={styles.tableRow} key={index}>
-              <Text style={styles.colItems}>{row.item || index + 1}</Text>
+              <Text style={styles.colItems}>{1 || index + 1}</Text>
+              <Text style={styles.colName}>{row.nombre}</Text>
               <Text style={styles.colDesc}>{row.descripcion}</Text>
               <Text style={styles.colQty}>{row.cantidad}</Text>
-              <Text style={styles.colUnitPrice}>{row.precioUnitario.toFixed(2)}</Text>
-              <Text style={styles.colTotal}>{(row.cantidad * row.precioUnitario).toFixed(2)}</Text>
+              {/* <Text style={styles.colUnitPrice}>{row.precioUnitario.toFixed(2)}</Text>
+              <Text style={styles.colTotal}>{(row.cantidad * row.precioUnitario).toFixed(2)}</Text> */}
             </View>
           ))}
         </View>
