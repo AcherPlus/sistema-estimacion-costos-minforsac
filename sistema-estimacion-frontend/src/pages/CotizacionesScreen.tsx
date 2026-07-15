@@ -28,11 +28,7 @@ export const CotizacionesScreen: React.FC = () => {
   const [precio, setPrecio] = useState<number | ''>('');
 
   // Estado de ejemplo para los ítems agregados
-  const [items, setItems] = useState<CotizacionItem[]>([
-    { id: 1, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
-    { id: 2, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
-    { id: 3, nombre: 'Nombre del ítem', descripcion: "Este es un item", tipo: 'Producto', cantidad: 2, precio: 125.00, total: 250.00 },
-  ]);
+  const [items, setItems] = useState<CotizacionItem[]>([]);
 
   useEffect(() => {
     const cargarClientes = async () => {
@@ -132,12 +128,13 @@ export const CotizacionesScreen: React.FC = () => {
       alert('Por favor completa los campos principales del ítem.');
       return;
     }
-    
+
     navigate("/cotizacion-pdf", {
       state: {
         data: {
           cliente: clienteNombre,
           direccion: direccion,
+          tipo_persona: tipoPersona,
           fecha: new Date().toISOString().split("T")[0],
           solicitante: 'Juan Perez',
           moneda: "SOLES",
@@ -380,7 +377,12 @@ export const CotizacionesScreen: React.FC = () => {
 
               {/* Contenedor de lista */}
               <div className="space-y-2.5 overflow-y-auto max-h-[350px] pr-1">
-                {items.map((item) => (
+                {items.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-gray-500 italic text-white">
+                    No hay ítems agregados
+                  </div>
+                ) : (
+                  items.map((item) => (
                   <CardItem
                     key={item.id}
                     id_item={item.id}
@@ -390,17 +392,16 @@ export const CotizacionesScreen: React.FC = () => {
                     total={item.total}
                     onDelete={handleDeleteItem}
                   />
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Total acumulado general */}
               <div className="bg-[#8E92A7] rounded-xl p-3.5 flex items-center justify-between text-black font-bold shadow-inner mt-4">
-                <span className="text-sm font-medium">Total</span>
+                <span className="text-sm font-medium">Total (+ IGV)</span>
                 <span className="text-base font-bold tracking-wide">{totalConIGV.toFixed(2)}</span>
               </div>
-
             </div>
-
           </div>
 
           {/* Botones de acción inferiores */}

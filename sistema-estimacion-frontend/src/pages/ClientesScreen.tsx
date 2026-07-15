@@ -1,33 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SideBarComponent from '../components/SideBar';
 import SearchBar from '../components/SearchBar';
-
-// Interfaz para tipar los datos de los clientes
-interface Cliente {
-  id: number;
-  nombre: string;
-  ruc: string;
-  direccion: string;
-}
+import { obtenerClientes, type Cliente } from '../services/clientes';
 
 export const ClientesScreen: React.FC = () => {
   // Estado para simular la lista de clientes
-  const [clientes] = useState<Cliente[]>([
-    { id: 1, nombre: 'Cliente 1', ruc: 'RUC 1', direccion: 'Dirección 1' },
-    { id: 2, nombre: 'Cliente 2', ruc: 'RUC 2', direccion: 'Dirección 2' },
-    { id: 3, nombre: 'Cliente 3', ruc: 'RUC 3', direccion: 'Dirección 3' },
-  ]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  
+  useEffect(() => {
+    const cargarClientes = async () => {
+      try {
+        const data = await obtenerClientes();
+        setClientes(data);
+      } catch (error) {
+        console.error('Error al cargar clientes', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarClientes();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#DCE4F3] font-sans antialiased">
-      
+
       <SideBarComponent />
 
       {/* 2. CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto">
-        
+
         {/* Cabecera: Título y Botón Agregar */}
         <div className="flex items-center gap-4 mb-8">
           <h1 className="text-4xl font-bold text-black tracking-tight">Clientes</h1>
@@ -39,36 +42,59 @@ export const ClientesScreen: React.FC = () => {
         {/* Barra de Búsqueda y Filtros */}
         <SearchBar />
 
-        {/* Grid de Tarjetas de Clientes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl">
-          {clientes.map((cliente) => (
-            <div key={cliente.id} className="flex flex-col gap-3">
-              
-              {/* Tarjeta Azul Superior */}
-              <div className="bg-[#222861] rounded-2xl p-4 h-28 relative shadow-md flex items-start justify-end gap-2">
-                <button className="bg-[#E2E4E9] text-gray-800 text-xs font-medium px-3 py-1 rounded-full hover:bg-white transition-colors">
-                  Editar
-                </button>
-                <button className="bg-[#E2E4E9] text-gray-800 text-xs font-medium px-3 py-1 rounded-full hover:bg-white transition-colors">
-                  Eliminar
-                </button>
-              </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg text-gray-600">Cargando clientes...</p>
+          </div>
+        ) : clientes.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg text-gray-500 italic">
+              No hay clientes registrados.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl">
+            {clientes.map((cliente) => (
+              <div key={cliente.cliente_id} className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col">
 
-              {/* Información del Cliente */}
-              <div className="px-1 space-y-0.5 text-black">
-                <p className="font-bold text-lg">{cliente.nombre}</p>
-                <p className="font-bold text-base">{cliente.ruc}</p>
-                <p className="font-bold text-base">{cliente.direccion}</p>
-              </div>
+                <div className="bg-[#222861] p-4 flex justify-end gap-2">
+                  <button className="bg-[#E2E4E9] text-gray-800 text-xs font-medium px-3 py-1 rounded-full hover:bg-white transition-colors">
+                    Editar
+                  </button>
 
-              {/* Botón Agregar Solicitud */}
-              <button className="w-full bg-[#343C8F] text-white py-3 rounded-2xl font-medium hover:bg-[#222861] transition-all shadow-sm text-sm mt-1">
-                Agregar solicitud
-              </button>
-              
-            </div>
-          ))}
-        </div>
+                  <button className="bg-[#E2E4E9] text-gray-800 text-xs font-medium px-3 py-1 rounded-full hover:bg-white transition-colors">
+                    Eliminar
+                  </button>
+                </div>
+
+                {/* Contenido */}
+                <div className="p-5 flex flex-col gap-2 text-black">
+                  <h2 className="text-xl font-bold">{cliente.nombre}</h2>
+
+                  <p>
+                    <span className="font-semibold">Correo:</span>{" "}
+                    {cliente.correo_electronico}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">Dirección:</span>{" "}
+                    {cliente.direccion}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">Tipo Persona:</span>{" "}
+                    {cliente.tipo_persona}
+                  </p>
+
+                  <button className="mt-4 w-full bg-[#343C8F] text-white py-3 rounded-xl hover:bg-[#222861] transition-all">
+                    Agregar solicitud
+                  </button>
+                </div>
+
+              </div>
+            ))}
+          </div>
+        )}
 
       </main>
     </div>

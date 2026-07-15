@@ -25,7 +25,39 @@ async function createCliente({ nombre, direccion, correo_electronico, tipo_perso
   return result.rows[0];
 }
 
+async function updateCliente(cliente_id, { nombre, direccion, correo_electronico, tipo_persona }) {
+  console.log('Modelo: actualizando cliente', cliente_id);
+
+  const result = await db.query(
+    `UPDATE "clientes"
+     SET nombre = $1,
+         direccion = $2,
+         correo_electronico = $3,
+         tipo_persona = $4
+     WHERE cliente_id = $5
+     RETURNING cliente_id, nombre, direccion, correo_electronico, tipo_persona`,
+    [nombre, direccion, correo_electronico, tipo_persona, cliente_id]
+  );
+
+  return result.rows[0];
+}
+
+async function deleteCliente(cliente_id) {
+  console.log('Modelo: eliminando cliente', cliente_id);
+
+  const result = await db.query(
+    `DELETE FROM "clientes"
+     WHERE cliente_id = $1
+     RETURNING cliente_id`,
+    [cliente_id]
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   getAllClientes,
   createCliente,
+  updateCliente,
+  deleteCliente,
 };
